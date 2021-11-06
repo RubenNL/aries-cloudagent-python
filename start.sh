@@ -1,1 +1,0 @@
-sudo PORTS="8000 8001 8002" scripts/run_docker start --inbound-transport http 0.0.0.0 8001 --inbound-transport ws 0.0.0.0 8002 --outbound-transport ws --outbound-transport http -e 'http://localhost:8001/' --genesis-url http://test.bcovrin.vonx.io/genesis --admin-insecure-mode --admin 0.0.0.0 8000
