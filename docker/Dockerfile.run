@@ -1,5 +1,12 @@
 FROM bcgovimages/von-image:py36-1.15-1
-
+USER root
+RUN apt update && apt-get install --no-install-recommends -y nodejs-dev node-gyp libssl1.0-dev && apt install --no-install-recommends build-essential pkg-config openssl cmake npm -y && apt remove cmake -y && npm install -g yarn && npm install -g n && n stable && curl https://sh.rustup.rs > rustup.sh && bash rustup.sh -y && rm rustup.sh && curl -L 'https://github.com/Kitware/CMake/releases/download/v3.22.0-rc2/cmake-3.22.0-rc2-linux-aarch64.sh' > cmake.sh && bash cmake.sh --skip-license && . $HOME/.cargo/env && git clone https://github.com/mattrglobal/ffi-bbs-signatures.git && cd ffi-bbs-signatures && yarn install --frozen-lockfile && yarn build:linux && cd wrappers/python && python3 setup.py install && cd && rm ffi-bbs-signatures -rf && git clone https://github.com/hyperledger/indy-vdr.git && cd indy-vdr && ./build.sh && cd wrappers/python && python3 setup.py install && cd && rm indy-vdr -rf && git clone https://github.com/hyperledger/aries-askar.git && cd aries-askar && ./build.sh && cd wrappers/python && python3 setup.py install && cd && rm -rf aries-askar && git clone https://github.com/hyperledger/indy-shared-rs.git && cd indy-shared-rs && ./build.sh && cd wrappers/python && python3 setup.py install && cd && rm indy-shared-rs -rf && echo "y" | n uninstall && rm .rustup .cargo bin/*cmake* cmake.sh /usr/local/n -rf
+#apt purge build-essential pkg-config openssl cmake npm -y && apt autoremove -y
+USER indy
+#RUN . $HOME/.cargo/env && git clone https://github.com/mattrglobal/ffi-bbs-signatures.git && cd ffi-bbs-signatures && yarn install --frozen-lockfile && yarn build:linux && cd wrappers/python && python3 setup.py install && cd && rm ffi-bbs-signatures -rf
+#RUN . $HOME/.cargo/env && git clone https://github.com/hyperledger/indy-vdr.git && cd indy-vdr && ./build.sh && cd wrappers/python && python3 setup.py install && cd && rm indy-vdr -rf
+#RUN . $HOME/.cargo/env && git clone https://github.com/hyperledger/aries-askar.git && cd aries-askar && ./build.sh && cd wrappers/python && python3 setup.py install && cd && rm -rf aries-askar
+#RUN . $HOME/.cargo/env && git clone https://github.com/hyperledger/indy-shared-rs.git && cd indy-shared-rs && ./build.sh && cd wrappers/python && python3 setup.py install && cd && rm indy-shared-rs -rf
 ENV ENABLE_PTVSD 0
 
 ADD requirements*.txt ./
@@ -14,9 +21,13 @@ ADD aries_cloudagent ./aries_cloudagent
 ADD bin ./bin
 ADD README.md ./
 ADD setup.py ./
-
+USER root
+RUN chown -R indy:indy .pyenv
+USER indy
 RUN pip3 install --no-cache-dir -e .
-
+USER root
+RUN apt purge build-essential pkg-config openssl cmake npm -y && apt autoremove -y && rm /usr/local/share -rf
+USER indy
 RUN mkdir logs && chown -R indy:indy logs && chmod -R ug+rw logs
-
 ENTRYPOINT ["/bin/bash", "-c", "aca-py \"$@\"", "--"]
+
