@@ -8,3 +8,4 @@ services:
       - 8000:8000
       - 8001:8001
       - 8002:8002
+    command: "start --inbound-transport http 0.0.0.0 8001 --inbound-transport ws 0.0.0.0 8002 --outbound-transport ws --outbound-transport http -e 'http://localhost:8001/' --genesis-url http://test.bcovrin.vonx.io/genesis --admin-insecure-mode --admin 0.0.0.0 8000"
